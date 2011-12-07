@@ -1,0 +1,11 @@
+form {
+	display: none;
+}
+
+.js > form {
+	display: block;
+}
+
+.error {
+	background-color: #ff6666;
+}
