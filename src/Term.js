@@ -3,12 +3,12 @@ var Term = new Class({
 		this._input = this._parse(input);
 	},
 	
-	isError: function() {
-		return this._input == null;
+	isValid: function() {
+		return typeOf(this._input) != "null";
 	},
 	
 	getHtml: function() {
-		if (this.isError()) {
+		if (!this.isValid()) {
 			return;
 		}
 		
@@ -16,7 +16,7 @@ var Term = new Class({
 	},
 	
 	calculate: function() {
-		if (this.isError()) {
+		if (!this.isValid()) {
 			return;
 		}
 		
@@ -24,9 +24,8 @@ var Term = new Class({
 	},
 	
 	_parse: function(input) {
-		input = input.toLowerCase();
-		
-		if (!input.test(/^[-+ 0-9a-z]*$/)) {
+		input = input || "0";
+		if (!input.test(new RegExp("^" + Term.pattern + "$"))) {
 			return;
 		}
 		
@@ -56,10 +55,18 @@ var Term = new Class({
 				element = "";
 			}
 		}
-		if (hierarchy.length && element) {
-			hierarchy[hierarchy.length-1].setSecond(element);
+		if (element) {
+			if (hierarchy.length) {
+				hierarchy[hierarchy.length-1].setSecond(element);
+			} else {
+				return new TermElement(element);
+			}
 		}
 		
 		return hierarchy[hierarchy.length-1];
 	}
+});
+
+Term.extend({
+	pattern: "[-+ 0-9A-Za-z]*"
 });

@@ -2,19 +2,19 @@
 
 <title>Ari-TR</title>
 <meta charset="utf-8">
-<link type="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
 <p>
-	0m?? = Muggelzahl (z.B. 0m10 = A), 0x?? Hexadezimal, 0o?? Oktal, 0b?? Binär.
+	0m?? = Muggelzahl (z.B. 0m10 = A), 0x?? Hexadezimal, 0o?? Oktal, 0b?? Binär, ?? Zauberzahl.
 </p>
 <form id="form" action="" method="post">
 	<p>
-		<input id="input" name="input" size="100">
+		<input id="input" name="input" title="Die Rechnung darf Basen-Angaben (0m, 0x, 0o, 0b), Zauberziffern (0-9, a-z, A-Z) sowie Operatoren (+, -) enthalten. Leerzeichen ( ) sind ebenfalls erlaubt und werden ignoriert." size="100">
 	</p>
-	<p id="styledinput"></p>
+	<p id="styledinput">0</p>
 	<p>
 		=
-		<output id="output" name="output"></output>
+		<output id="output" for="input" name="output">0</output>
 	</p>
 </form>
 

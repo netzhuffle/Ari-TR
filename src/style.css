@@ -6,6 +6,6 @@ form {
 	display: block;
 }
 
-.error {
-	background-color: #ff6666;
+:invalid, .invalid {
+	background-color: #f88;
 }

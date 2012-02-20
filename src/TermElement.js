@@ -32,7 +32,7 @@ var TermElement = new Class({
 	},
 	
 	getOperator: function() {
-		return this;
+		return this._operator;
 	},
 	setOperator: function(operator) {
 		this._operator = operator;
@@ -41,44 +41,57 @@ var TermElement = new Class({
 	},
 	
 	calculate: function(base) {
-		if (!this._first || !this._second) {
+		base = base || 10;
+		var result = this.calculateBigInt();
+		if(!result) {
+			return;
+		}
+		
+		return (result && result.negative ? "-" : "") + bigInt2str(result, base);
+	},
+	
+	calculateBigInt: function() {
+		if (!this._first || this._operator && !this._second || this._second && !this._operator) {
 			return;
 		}
 		
 		var first = this._first;
-		if (first.calculate) {
-			first = first.calculate();
-			if (!first) {
+		if (typeOf(first.calculateBigInt) == "function") {
+			first = first.calculateBigInt();
+			if(!first) {
 				return;
 			}
 		}
 		var second = this._second;
-		if (second.calculate) {
-			second = second.calculate();
-			if (!second) {
+		if (second && typeOf(second.calculateBigInt) == "function") {
+			second = second.calculateBigInt();
+			if(!second) {
 				return;
 			}
 		}
 		
 		var result;
-		if (this._operator == "+") {
+		if (!this._operator) {
+			result = this._first;
+		} else if (this._operator == "+") {
 			result = this._add(first, second);
 		} else if (this._operator == "-") {
 			result = this._substract(first, second);
+		} else {
+			return;
 		}
 		if (isZero(result)) {
 			result.negative = false;
-		}
-		
-		if (base) {
-			result = (result.negative ? "-" : "") + bigInt2str(result, base);
 		}
 		
 		return result;
 	},
 	
 	_parse: function(element) {
-		if(typeOf(element) == "string") {
+		// bigInt = array
+		if(typeOf(element) == "array" || typeOf(element) == "object" && typeOf(element.calculateBigInt) == "function") {
+			return element;
+		} else if(typeOf(element) == "string") {
 			// check base
 			var base = 36;
 			if (element.length >= 2 && element.charAt(0) == 0 && this.bases[element.charAt(1)]) {
@@ -87,9 +100,12 @@ var TermElement = new Class({
 			}
 			// create bigint
 			element = str2bigInt(element, base);
+			
+			return element;
+		} else {
+			return;
 		}
 		
-		return element;
 	},
 	
 	_add: function(first, second) {
