@@ -29,16 +29,19 @@ test("wrong inputs", function() {
 });
 
 test("+", function() {
+	var zero = str2bigInt("0", 10);
 	var one = str2bigInt("1", 10);
 	var two = str2bigInt("2", 10);
 	var three = str2bigInt("3", 10);
+	
 	var minusone = str2bigInt("1", 10);
 	minusone.negative = true;
+	
 	var minustwo = str2bigInt("2", 10);
 	minustwo.negative = true;
+	
 	var minusthree = str2bigInt("3", 10);
 	minusthree.negative = true;
-	var zero = str2bigInt("0", 10);
 
 	deepEqual(Calculator.calculate("+", one, one), two, "1 + 1 = 2");
 	deepEqual(Calculator.calculate("+", one, two), three, "1 + 2 = 3");
@@ -55,16 +58,19 @@ test("+", function() {
 });
 
 test("-", function() {
+	var zero = str2bigInt("0", 10);
 	var one = str2bigInt("1", 10);
 	var two = str2bigInt("2", 10);
 	var three = str2bigInt("3", 10);
+	
 	var minusone = str2bigInt("1", 10);
 	minusone.negative = true;
+	
 	var minustwo = str2bigInt("2", 10);
 	minustwo.negative = true;
+	
 	var minusthree = str2bigInt("3", 10);
 	minusthree.negative = true;
-	var zero = str2bigInt("0", 10);
 
 	deepEqual(Calculator.calculate("-", one, one), zero, "1 - 1 = 0");
 	deepEqual(Calculator.calculate("-", three, one), two, "3 - 1 = 2");
@@ -82,32 +88,45 @@ test("-", function() {
 module("Term");
 
 test("isValid()", function() {
-	var t0 = new Term("");
-	ok(t0.isValid(), "empty string");
-	var t1 = new Term("1");
-	ok(t1.isValid(), "1");
-	var t2 = new Term("2+5-3-az+abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	ok(t2.isValid(), "long case changing string");
-	var t3 = new Term("0zA");
-	ok(t3.isValid(), "0zA");
-	var t4 = new Term("0z");
-	ok(t4.isValid(), "0z");
-	var t5 = new Term("0u");
-	ok(t5.isValid(), "0u");
-	var t6 = new Term("1#2");
-	ok(!t6.isValid(), "1#2");
-	var t7 = new Term("1+");
-	ok(t7.isValid(), "1+ (still typing)");
-	var t8 = new Term("1++2");
-	ok(!t8.isValid(), "1++2");
-	var t9 = new Term("1-+2");
-	ok(!t9.isValid(), "1-+2");
-	var t10 = new Term("hello+this-is-");
-	ok(t10.isValid(), "hello+this-is- (still typing)");
+	// TODO merge tests from isValid() and Term.pattern, more edge cases
+	
+	var t = new Term("");
+	ok(t.isValid(), "empty string");
+	
+	t = new Term("1");
+	ok(t.isValid(), "1");
+	
+	t = new Term("2+5-3-az+abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	ok(t.isValid(), "long case changing string");
+	
+	t = new Term("0zA");
+	ok(t.isValid(), "0zA");
+	
+	t = new Term("0z");
+	ok(t.isValid(), "0z");
+	
+	t = new Term("0u");
+	ok(t.isValid(), "0u");
+	
+	t = new Term("1#2");
+	ok(!t.isValid(), "1#2");
+	
+	t = new Term("1+");
+	ok(t.isValid(), "1+ (still typing)");
+	
+	t = new Term("1++2");
+	ok(!t.isValid(), "1++2");
+	
+	t = new Term("1-+2");
+	ok(!t.isValid(), "1-+2");
+	
+	t = new Term("hello+this-is- ");
+	ok(t.isValid(), "hello+this-is-[space] (still typing)");
 });
 
 test("Term.pattern", function() {
 	ok(Term.pattern, "pattern defined");
+	
 	ok(RegExp("^" + Term.pattern + "$"), "pattern valid RegExp");
 	ok(RegExp("^" + Term.pattern + "$").test("ABCDE0FGHIJ1KLMNO2PQRS3TU4VW5XY6Z+0zab7cdefg8hijklmnop9qrstuvwxyz-0+"), "working pattern");
 	ok(RegExp("^" + Term.pattern + "$").test(""), "working pattern for empty string");
@@ -118,41 +137,61 @@ test("Term.pattern", function() {
 	ok(!RegExp("^" + Term.pattern + "$").test("a--2"), "minus minus");
 	ok(!RegExp("^" + Term.pattern + "$").test("-2"), "start with minus");
 	ok(!RegExp("^" + Term.pattern + "$").test("+2"), "start with plus");
+	ok(!RegExp("^" + Term.pattern + "$").test(" +2"), "start with space and plus");
+	ok(RegExp("^" + Term.pattern + "$").test("2+"), "end with plus (still typing)");
+	ok(RegExp("^" + Term.pattern + "$").test("2+ "), "end with plus and space (still typing)");
+	ok(RegExp("^" + Term.pattern + "$").test("2 + "), "end with space, plus and space (still typing)");
 });
 
 test("calculate()", function() {
-	var t0 = new Term("$");
-	ok(!t0, "false value for invalid term");
-	var t1 = new Term("");
-	strictEqual(t1.calculate(), "0", "0 for empty string");
-	var t2 = new Term("1+1");
-	strictEqual(t2.calculate(), "2", "1+1");
-	var t3 = new Term("1+1-5+2+3-9+A-3-1-1");
-	strictEqual(t3.calculate(), "-2", "longer string");
-	var t4 = new Term("0+1+1-3+1-0");
-	strictEqual(t4.calculate(), "0", "result zero");
-	var t5 = new Term("1 000 + 1 000 000 - 2");
-	strictEqual(t5.calculate(), "1000ZZY", "ignore spaces, result with capital letters");
+	var t = new Term("$");
+	ok(!t.calculate(), "false value for invalid term");
 	
-	var b1 = new Term("10");
-	deepEqual(b1.calculate(), "10", "implizit 0z");
-	var b2 = new Term("0z10");
-	deepEqual(b2.calculate(), "10", "0z");
-	var b3 = new Term("0x10");
-	deepEqual(b3.calculate(), "G", "0x");
-	var b4 = new Term("0m10");
-	deepEqual(b4.calculate(), "A", "0m");
-	var b5 = new Term("0o10");
-	deepEqual(b5.calculate(), "8", "0o");
-	var b6 = new Term("0b10");
-	deepEqual(b6.calculate(), "2", "0b");
-	var b7 = new Term("0aa");
-	deepEqual(b7.calculate(), "AA", "no base but prefixed with 0");
+	t = new Term("");
+	strictEqual(t.calculate(), "0", "0 for empty string");
+	
+	t = new Term("1+1");
+	strictEqual(t.calculate(), "2", "1+1");
+	
+	t = new Term("1+1-5+2+3-9+A-3-1-1");
+	strictEqual(t.calculate(), "-2", "longer string");
+	
+	t = new Term("0+1+1-3+1-0");
+	strictEqual(t.calculate(), "0", "result zero");
+	
+	t = new Term("   0 +1+1 -3+ 1 -0  ");
+	strictEqual(t.calculate(), "0", "ignore spaces");
+	
+	t = new Term("1 000 + 1 000 000 - 2");
+	strictEqual(t.calculate(), "1000ZZY", "ignore spaces inside numbers, result with capital letters");
+});
+
+test("calculate() bases", function() {
+	var t = new Term("10");
+	deepEqual(t.calculate(), "10", "implizit 0z");
+	
+	t = new Term("0z10");
+	deepEqual(t.calculate(), "10", "0z");
+	
+	t= new Term("0x10");
+	deepEqual(t.calculate(), "G", "0x");
+	
+	t = new Term("0m10");
+	deepEqual(t.calculate(), "A", "0m");
+	
+	t = new Term("0o10");
+	deepEqual(t.calculate(), "8", "0o");
+	
+	t = new Term("0b10");
+	deepEqual(t.calculate(), "2", "0b");
+	
+	t = new Term("0aa");
+	deepEqual(t.calculate(), "AA", "no base but prefixed with 0");
 });
 
 test("getHtml", function() {
-	var t0 = new Term("4##3");
-	ok(!t0, "false value for invalid term");
+	var t = new Term("4##3");
+	ok(!t.getHtml(), "false value for invalid term");
 	// TODO
 });
 </script>

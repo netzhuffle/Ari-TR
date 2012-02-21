@@ -4,26 +4,31 @@ var Calculator = {
 			return;
 		}
 		
+		var result;
 		if (operation == "+") {
-			return this._add(firstBigInt, secondBigInt);
+			result = this._add(firstBigInt, secondBigInt);
 		}
 		
 		if (operation == "-") {
-			return this._substract(firstBigInt, secondBigInt);
+			result = this._substract(firstBigInt, secondBigInt);
 		}
 		
-		return; // unsupported operation
+		if(result && isZero(result)) {
+			result.negative = false;
+		}
+		
+		return result;
 	},
 	
 	_add: function(first, second) {
 		if (second.negative) {
-			second.negative = false;
+			second = Array.clone(second); // clone to not destroy reference (need negative = false)
 			
 			return this._substract(first, second);
 		}
 		
 		if (first.negative) {
-			first.negative = false;
+			first = Array.clone(first); // clone to not destroy reference (need negative = false)
 			
 			return this._substract(second, first);
 		}
@@ -33,13 +38,14 @@ var Calculator = {
 	
 	_substract: function(first, second) {
 		if (second.negative) {
-			second.negative = false;
+			second = Array.clone(second); // clone to not destroy reference (need negative = false)
+			//second.negative = false;
 			
 			return this._add(first, second);
 		}
 		
 		if (first.negative) {
-			first.negative = false;
+			first = Array.clone(first); // clone to not destroy reference (need negative = false)
 			var result = this._add(first, second);
 			result.negative = true;
 			

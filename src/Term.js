@@ -20,6 +20,7 @@ var Term = new Class({
 			return;
 		}
 		
+		// TODO
 		return "(html)";
 	},
 	
@@ -61,7 +62,7 @@ var Term = new Class({
 	},
 	
 	_parse: function(input) {
-		input = input.replace(/ /, ""); // strip spaces
+		input = input.replace(/ /g, ""); // strip spaces
 		input = input || "0";
 		if (!input.test(new RegExp("^" + Term.pattern + "$"))) {
 			return;
@@ -110,5 +111,5 @@ var Term = new Class({
 });
 
 Term.extend({
-	pattern: "[-+ 0-9A-Za-z]*"
+	pattern: " *([0-9A-Za-z]+ *([+-] *[0-9A-Za-z]+ *)*[+-]? *)?"
 });
