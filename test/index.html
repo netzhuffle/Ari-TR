@@ -13,197 +13,70 @@
 <script src="qunit/qunit/qunit.js"></script>
 <script src="../src/BigInt.js"></script>
 <script src="../src/mootools.js"></script>
-<script src="../src/TermElement.js"></script>
+<script src="../src/Calculator.js"></script>
 <script src="../src/Term.js"></script>
 
 <script>
-module("TermElement");
+module("Calculator");
 
-test("test initialize and getters", function() {
+test("wrong inputs", function() {
 	var first = str2bigInt("first", 36);
 	var second = str2bigInt("second", 36);
 	
-	var t1 = new TermElement(first, "+", second);
-	deepEqual(t1.getFirst(), first, "first as bigint");
-	strictEqual(t1.getOperator(), "+", "operator");
-	deepEqual(t1.getSecond(), second, "second as bigint");
-	
-	var t2 = new TermElement("first", "-", "second");
-	deepEqual(t2.getFirst(), first, "first as string");
-	deepEqual(t2.getSecond(), second, "second as string");
-	
-	var t3 = new TermElement(t1, "-", t2);
-	deepEqual(t3.getFirst(), t1, "first TermElement");
-	deepEqual(t3.getSecond(), t2, "second TermElement");
-	
-	var t4 = new TermElement("in#valid", "$", "str!ngs");
-	ok(!t4.getFirst(), "invalid first as string");
-	ok(!t4.getOperator(), "invalid operator");
-	ok(!t4.getSecond(), "invalid second as string");
-	
-	var t5 = new TermElement({}, "+", {});
-	ok(!t5.getFirst(), "invalid first as object");
-	ok(!t5.getSecond(), "invalid second as object");
+	ok(!Calculator.calculate("+", null, second), "no first");
+	ok(!Calculator.calculate("+", first), "no second");
+	ok(!Calculator.calculate("#", first, second), "wrong operator");
 });
 
-test("test setters and getters", function() {
-	var one = str2bigInt("one", 36);
-	var two = str2bigInt("two", 36);
-	
-	var t1 = new TermElement();
-	deepEqual(t1.setFirst(one), one, "set first as bigint");
-	deepEqual(t1.getFirst(), one, "get first as bigint");
-	strictEqual(t1.setOperator("+"), "+", "set operator");
-	strictEqual(t1.getOperator(), "+", "get operator");
-	deepEqual(t1.setSecond(two), two, "set second as bigint");
-	deepEqual(t1.getSecond(), two, "get second as bigint");
-	
-	var t2 = new TermElement();
-	deepEqual(t1.setFirst("one"), one, "set first as string");
-	deepEqual(t1.getFirst(), one, "get first as string");
-	deepEqual(t1.setSecond("two"), two, "set second as string");
-	deepEqual(t1.getSecond(), two, "get second as string");
-	
-	var t3 = new TermElement();
-	deepEqual(t3.setFirst(t1), t1, "set first TermElement");
-	deepEqual(t3.getFirst(), t1, "get first TermElement");
-	deepEqual(t3.setSecond(t2), t2, "set second TermElement");
-	deepEqual(t3.getSecond(), t2, "get second TermElement");
-	
-	var t4 = new TermElement();
-	ok(!t4.setFirst("fälse"), "set invalid first as string");
-	ok(!t4.getFirst(), "get invalid first as string");
-	ok(!t4.setOperator(""), "set invalid operator");
-	ok(!t4.getOperator(), "get invalid operator");
-	ok(!t4.setSecond("not_ok"), "set invalid second as string");
-	ok(!t4.getSecond(), "get invalid second as string");
-	
-	var t5 = new TermElement();
-	ok(!t5.setFirst({}), "set invalid first as object");
-	ok(!t5.getFirst(), "get invalid first as object");
-	ok(!t5.getSecond({}), "set invalid second as object");
-	ok(!t5.getSecond(), "get invalid second as object");
-});
-
-test("bases", function() {
-	var ten = str2bigInt("10", 10);
-	
-	var t = new TermElement("a");
-	deepEqual(t.getFirst(), ten, "implizit 0z");
-	deepEqual(t.setFirst("0za"), ten, "0z");
-	deepEqual(t.setFirst("0xa"), ten, "0x");
-	deepEqual(t.setFirst("0m10"), ten, "0m");
-	deepEqual(t.setFirst("0o12"), ten, "0o");
-	deepEqual(t.setFirst("0b1010"), ten, "0b");
-	deepEqual(t.setFirst("0a"), ten, "no base but prefixed with 0");
-});
-
-test("calculateBigInt() aborts", function() {
-	var t1 = new TermElement(null, "+", "one");
-	ok(!t1.calculateBigInt(), "no first");
-	
-	var t2 = new TermElement("one", null, "two");
-	ok(!t2.calculateBigInt(), "no operator but second");
-	
-	var t3 = new TermElement("one", "+");
-	ok(!t3.calculateBigInt(), "operator but no second");
-});
-
-test("calculateBigInt() positive", function() {
+test("+", function() {
 	var one = str2bigInt("1", 10);
 	var two = str2bigInt("2", 10);
 	var three = str2bigInt("3", 10);
-	
-	var t1 = new TermElement("2");
-	deepEqual(t1.calculateBigInt(), two, "first as string only");
-	t1.setFirst(one);
-	deepEqual(t1.calculateBigInt(), one, "first as bigint only");
-	t1.setFirst(new TermElement(two));
-	deepEqual(t1.calculateBigInt(), two, "first as TermElement only");
-	
-	var t2 = new TermElement("0", "+", "1");
-	deepEqual(t2.calculateBigInt(), one, "add two strings");
-	t2.setFirst(one);
-	deepEqual(t2.calculateBigInt(), two, "add bigint and string");
-	t2.setFirst(new TermElement(two));
-	deepEqual(t2.calculateBigInt(), three, "add TermElement and string");
-	
-	var t3 = new TermElement(new TermElement(two), new TermElement(one));
-	deepEqual(t3.calculateBigInt(), three, "add two TermElements")
-	
-	var t4 = new TermElement("4", "-", "3");
-	deepEqual(t4.calculateBigInt(), one, "substract two strings");
-	t4.setSecond(two);
-	deepEqual(t4.calculateBigInt(), two, "substract string and bigint");
-	t4.setSecond(new TermElement("1"), three, "substract string and TermElement");
+	var minusone = str2bigInt("1", 10);
+	minusone.negative = true;
+	var minustwo = str2bigInt("2", 10);
+	minustwo.negative = true;
+	var minusthree = str2bigInt("3", 10);
+	minusthree.negative = true;
+	var zero = str2bigInt("0", 10);
+
+	deepEqual(Calculator.calculate("+", one, one), two, "1 + 1 = 2");
+	deepEqual(Calculator.calculate("+", one, two), three, "1 + 2 = 3");
+	deepEqual(Calculator.calculate("+", zero, zero), zero, "0 + 0 = 0");
+	deepEqual(Calculator.calculate("+", zero, two), two, "0 + 2 = 2");
+	deepEqual(Calculator.calculate("+", two, zero), two, "2 + 0 = 2");
+	deepEqual(Calculator.calculate("+", two, minusone), one, "2 + (-1) = 1");
+	deepEqual(Calculator.calculate("+", one, minustwo), minusone, "1 + (-2) = (-1)");
+	deepEqual(Calculator.calculate("+", minusone, one), zero, "(-1) + 1 = 0");
+	deepEqual(Calculator.calculate("+", minustwo, three), one, "(-2) + 3 = 1");
+	deepEqual(Calculator.calculate("+", one, minusone), zero, "1 + (-1) = 0");
+	deepEqual(Calculator.calculate("+", minustwo, one), minusone, "(-2) + 1 = (-1)");
+	deepEqual(Calculator.calculate("+", minusone, minustwo), minusthree, "(-1) + (-2) = (-3)");
 });
 
-test("calculateBigInt() TermElement chains", function() {
-	var t = new TermElement(
-		new TermElement(
-			new TermElement("2", "+", "2"), // = 4
-			"-",
-			new TermElement("3", "-", "1") // = 2
-		), // = 2
-		"-",
-		new TermElement(
-			"0",
-			"+",
-			new TermElement("6", "-", "5") // = 1
-		) // = 1
-	); // = 1
-	deepEqual(t.calculateBigInt(), str2bigInt("1", 8), "TermElement chain");
-});
-
-test("calculateBigInt() negative", function() {
+test("-", function() {
 	var one = str2bigInt("1", 10);
 	var two = str2bigInt("2", 10);
-	var minusone = new TermElement(one, "-", two);
-	var minustwo = new TermElement("0", "-", two);
-	var minusthree = new TermElement(minustwo, "-", "1");
-	
-	var t1 = new TermElement(minusone, "+", "0");
-	deepEqual(t1.calculateBigInt(), minusone, "(-1) + 0");
-	t1.setSecond(minustwo);
-	deepEqual(t1.calculateBigInt(), minusthree, "(-1) + (-2)");
-	t1.setSecond(new TermElement(one));
-	deepEqual(t1.calculateBigInt(), minusone, "1 + (-2)");
-	t1.setFirst("0");
-	deepEqual(t1.calculateBigInt(), minustwo, "0 + (-2)");
-	
-	var t2 = new TermElement("0", "-", "1");
-	deepEqual(t2.calculateBigInt(), minusone, "0 - 1");
-	t2.setFirst(minusone);
-	deepEqual(t2.calculateBigInt(), minustwo, "(-1) - 1");
-	t2.setSecond(new TermElement(minustwo));
-	deepEqual(t2.calculateBigInt(), one, "(-1) - (-2)");
-	t2.setFirst("1");
-	deepEqual(t2.calculateBigInt(), minusone, "1 - (-2)");
-	
-	var t3 = new TermElement(
-		new TermElement("0", "-", "1"), // -1
-		"-",
-		new TermElement(
-			new TermElement("1", "-", "3"), // -2
-			"+",
-			new TermElement("3")
-		) // 1
-	); // -2
-	deepEqual(t3.calculateBigInt(), minustwo, "chained");
-});
+	var three = str2bigInt("3", 10);
+	var minusone = str2bigInt("1", 10);
+	minusone.negative = true;
+	var minustwo = str2bigInt("2", 10);
+	minustwo.negative = true;
+	var minusthree = str2bigInt("3", 10);
+	minusthree.negative = true;
+	var zero = str2bigInt("0", 10);
 
-test("calculate()", function() {
-	var t1 = new TermElement("1", "+", "1");
-	strictEqual(t1.calculate(), "2", "1 + 1 = 2");
-	t1.setSecond(new TermElement("1", "-", "4")); // -3
-	strictEqual(t1.calculate(), "-2", "1 + (-3) = (-2)");
-	t1.setOperator("-");
-	strictEqual(t1.calculate(), "4", "1 - (-3) = 4");
-	strictEqual(t1.calculate(2), "100", "binary");
-	strictEqual(t1.calculate(4), "10", "base 4");
-	
-	var t2 = new TermElement("1", "-", "1");
-	strictEqual(t2.calculate(), "0", "zero");
+	deepEqual(Calculator.calculate("-", one, one), zero, "1 - 1 = 0");
+	deepEqual(Calculator.calculate("-", three, one), two, "3 - 1 = 2");
+	deepEqual(Calculator.calculate("-", one, three), minustwo, "1 - 3 = (-2)");
+	deepEqual(Calculator.calculate("-", zero, zero), zero, "0 - 0 = 0");
+	deepEqual(Calculator.calculate("-", zero, two), minustwo, "0 - 2 = (-2)");
+	deepEqual(Calculator.calculate("-", two, zero), two, "2 - 0 = 2");
+	deepEqual(Calculator.calculate("-", two, minusone), three, "2 - (-1) = 3");
+	deepEqual(Calculator.calculate("-", minusone, one), minustwo, "(-1) - 1 = (-2)");
+	deepEqual(Calculator.calculate("-", minusone, minusone), zero, "(-1) - (-1) = 0");
+	deepEqual(Calculator.calculate("-", minusthree, minustwo), minusone, "(-3) - (-2) = (-1)");
+	deepEqual(Calculator.calculate("-", minustwo, minusthree), one, "(-3) - (-2) = (-1)");
 });
 
 module("Term");
@@ -215,16 +88,22 @@ test("isValid()", function() {
 	ok(t1.isValid(), "1");
 	var t2 = new Term("2+5-3-az+abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	ok(t2.isValid(), "long case changing string");
-	var t3 = new Term("1#2");
-	ok(!t3.isValid(), "1#2");
-	var t4 = new Term("1+");
-	ok(t4.isValid(), "1+ (still typing)");
-	var t5 = new Term("1++2");
-	ok(!t5.isValid(), "1++2");
-	var t6 = new Term("1-+2");
-	ok(!t6.isValid(), "1-+2");
-	var t7 = new Term("hello+this-is-");
-	ok(t7.isValid(), "hello+this-is- (still typing)");
+	var t3 = new Term("0zA");
+	ok(t3.isValid(), "0zA");
+	var t4 = new Term("0z");
+	ok(t4.isValid(), "0z");
+	var t5 = new Term("0u");
+	ok(t5.isValid(), "0u");
+	var t6 = new Term("1#2");
+	ok(!t6.isValid(), "1#2");
+	var t7 = new Term("1+");
+	ok(t7.isValid(), "1+ (still typing)");
+	var t8 = new Term("1++2");
+	ok(!t8.isValid(), "1++2");
+	var t9 = new Term("1-+2");
+	ok(!t9.isValid(), "1-+2");
+	var t10 = new Term("hello+this-is-");
+	ok(t10.isValid(), "hello+this-is- (still typing)");
 });
 
 test("Term.pattern", function() {
@@ -232,6 +111,13 @@ test("Term.pattern", function() {
 	ok(RegExp("^" + Term.pattern + "$"), "pattern valid RegExp");
 	ok(RegExp("^" + Term.pattern + "$").test("ABCDE0FGHIJ1KLMNO2PQRS3TU4VW5XY6Z+0zab7cdefg8hijklmnop9qrstuvwxyz-0+"), "working pattern");
 	ok(RegExp("^" + Term.pattern + "$").test(""), "working pattern for empty string");
+	ok(!RegExp("^" + Term.pattern + "$").test("ab#23"), "invalid chars");
+	ok(!RegExp("^" + Term.pattern + "$").test("a++2"), "plus plus");
+	ok(!RegExp("^" + Term.pattern + "$").test("a+-2"), "plus minus");
+	ok(!RegExp("^" + Term.pattern + "$").test("a-+2"), "minus plus");
+	ok(!RegExp("^" + Term.pattern + "$").test("a--2"), "minus minus");
+	ok(!RegExp("^" + Term.pattern + "$").test("-2"), "start with minus");
+	ok(!RegExp("^" + Term.pattern + "$").test("+2"), "start with plus");
 });
 
 test("calculate()", function() {
@@ -241,12 +127,27 @@ test("calculate()", function() {
 	strictEqual(t1.calculate(), "0", "0 for empty string");
 	var t2 = new Term("1+1");
 	strictEqual(t2.calculate(), "2", "1+1");
-	var t3 = new Term("1+1-5+2-9+A-3");
-	strictEqual(t3.calculate(), "-3", "longer string");
-	var t4 = new Term("0m36");
-	strictEqual(t4.calculate(), "10", "result with base 36");
+	var t3 = new Term("1+1-5+2+3-9+A-3-1-1");
+	strictEqual(t3.calculate(), "-2", "longer string");
+	var t4 = new Term("0+1+1-3+1-0");
+	strictEqual(t4.calculate(), "0", "result zero");
 	var t5 = new Term("1 000 + 1 000 000 - 2");
-	strictEqual(t5.calculate(), "1000ZZY", "ignore spaces, capital letters");
+	strictEqual(t5.calculate(), "1000ZZY", "ignore spaces, result with capital letters");
+	
+	var b1 = new Term("10");
+	deepEqual(b1.calculate(), "10", "implizit 0z");
+	var b2 = new Term("0z10");
+	deepEqual(b2.calculate(), "10", "0z");
+	var b3 = new Term("0x10");
+	deepEqual(b3.calculate(), "G", "0x");
+	var b4 = new Term("0m10");
+	deepEqual(b4.calculate(), "A", "0m");
+	var b5 = new Term("0o10");
+	deepEqual(b5.calculate(), "8", "0o");
+	var b6 = new Term("0b10");
+	deepEqual(b6.calculate(), "2", "0b");
+	var b7 = new Term("0aa");
+	deepEqual(b7.calculate(), "AA", "no base but prefixed with 0");
 });
 
 test("getHtml", function() {
