@@ -9,3 +9,7 @@ form {
 :invalid, .invalid {
 	background-color: #f88;
 }
+
+sub {
+	font-size: 0.6em;
+}

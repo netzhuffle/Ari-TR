@@ -20,8 +20,7 @@ var Term = new Class({
 			return;
 		}
 		
-		// TODO
-		return "(html)";
+		return this._getHtml(this._term);
 	},
 	
 	calculate: function(base) {
@@ -35,6 +34,38 @@ var Term = new Class({
 		}
 		
 		return (bigInt && bigInt.negative ? "-" : "") + bigInt2str(bigInt, base);
+	},
+	
+	_getHtml: function(term) {
+		if (typeOf(term) != "array" || !term.bigInt && !term.operator) {
+			return;
+		}
+		
+		if (term.bigInt) {
+			var baseString = term.base;
+			if (baseString == 36) {
+				baseString = "ZA";
+			} else if (baseString == 10) {
+				baseString = "MU";
+			}
+			return bigInt2str(term, term.base) + "<sub>" + baseString + "</sub>";
+		}
+		
+		var result = "";
+		for (var i = 0; i < term.length; i++) {
+			result += this._getHtml(term[i]);
+			if(term[i+1]) {
+				if (term.operator == "+") {
+					result += " + ";
+				} else if (term.operator == "-") {
+					result += " - ";
+				} else {
+					return;
+				}
+			}
+		}
+		
+		return result;
 	},
 	
 	_calculateBigInt: function(term) {
@@ -79,6 +110,7 @@ var Term = new Class({
 			// create bigint
 			var bigInt = str2bigInt(input, base);
 			bigInt.bigInt = true;
+			bigInt.base = base;
 			
 			return bigInt;
 		}

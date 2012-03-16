@@ -168,30 +168,47 @@ test("calculate()", function() {
 
 test("calculate() bases", function() {
 	var t = new Term("10");
-	deepEqual(t.calculate(), "10", "implizit 0z");
+	strictEqual(t.calculate(), "10", "implizit 0z");
 	
 	t = new Term("0z10");
-	deepEqual(t.calculate(), "10", "0z");
+	strictEqual(t.calculate(), "10", "0z");
 	
 	t= new Term("0x10");
-	deepEqual(t.calculate(), "G", "0x");
+	strictEqual(t.calculate(), "G", "0x");
 	
 	t = new Term("0m10");
-	deepEqual(t.calculate(), "A", "0m");
+	strictEqual(t.calculate(), "A", "0m");
 	
 	t = new Term("0o10");
-	deepEqual(t.calculate(), "8", "0o");
+	strictEqual(t.calculate(), "8", "0o");
 	
 	t = new Term("0b10");
-	deepEqual(t.calculate(), "2", "0b");
+	strictEqual(t.calculate(), "2", "0b");
 	
 	t = new Term("0aa");
-	deepEqual(t.calculate(), "AA", "no base but prefixed with 0");
+	strictEqual(t.calculate(), "AA", "no base but prefixed with 0");
 });
 
 test("getHtml", function() {
 	var t = new Term("4##3");
 	ok(!t.getHtml(), "false value for invalid term");
-	// TODO
+	
+	t = new Term("0z1");
+	strictEqual(t.getHtml(), "1<sub>ZA</sub>", "0z numbers");
+	
+	t = new Term("0m1");
+	strictEqual(t.getHtml(), "1<sub>MU</sub>", "0m numbers");
+	
+	t = new Term("0x1");
+	strictEqual(t.getHtml(), "1<sub>16</sub>", "0x numbers");
+	
+	t = new Term("0o1");
+	strictEqual(t.getHtml(), "1<sub>8</sub>", "0o numbers");
+	
+	t = new Term("0b1");
+	strictEqual(t.getHtml(), "1<sub>2</sub>", "0b numbers");
+	
+	t = new Term(" 1+0zab+0xcde -0b 011+ 0m0 02 0-0o7 ");
+	strictEqual(t.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> + CDE<sub>16</sub> - 11<sub>2</sub> + 20<sub>MU</sub> - 7<sub>8</sub>", "addition and substraction");
 });
 </script>
