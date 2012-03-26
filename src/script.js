@@ -4,17 +4,17 @@ document.addEvent("domready", function() {
 	var output = $("output");
 	
 	var action = function() {
-		var term = new Term(input.get("value"));
-		if (!term.isValid()) {
+		var expression = new Expression(input.get("value"));
+		if (!expression.isValid()) {
 			input.addClass("invalid");
 		} else {
 			input.removeClass("invalid");
-			styledInput.set("html", term.getHtml() || "");
-			output.set("html", term.calculate() || "");
+			styledInput.set("html", expression.getHtml() || "");
+			output.set("html", expression.calculate() || "");
 		}
 	};
 
-	input.set("pattern", Term.pattern);
+	input.set("pattern", Expression.pattern);
 	input.addEvent("keyup", action);
 	$("form").addEvent("submit", function(e) {
 		e.preventDefault();
