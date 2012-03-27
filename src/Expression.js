@@ -1,3 +1,5 @@
+Array.implement("peek", Array.prototype.getLast);
+
 var Expression = new Class({
 	bases: {
 		z: 36,
@@ -7,12 +9,17 @@ var Expression = new Class({
 		b: 2
 	},
 	
+	operators: { // value: precedence from 1 to n, higher numbers = higher precedence
+		"+": 1,
+		"-": 1
+	},
+	
 	initialize: function(input) {
 		this._expression = this._parse(input);
 	},
 	
 	isValid: function() {
-		return typeOf(this._expression) != "null";
+		return typeOf(this._expression) == "array";
 	},
 	
 	getHtml: function() {
@@ -20,76 +27,57 @@ var Expression = new Class({
 			return;
 		}
 		
-		return this._getHtml(this._expression);
+		var stack = [];
+		for (var i = 0; i < this._expression.length; i++) {
+			stack[i] = this._expression[i];
+		}
+		return this._getHtml(stack);
 	},
 	
 	calculate: function(base) {
 		if (!this.isValid()) {
 			return;
 		}
+		
 		base = base || 36;
-		var bigInt = this._calculateBigInt(this._expression);
-		if (!bigInt) {
-			return;
-		}
+		var bigInt = this._calculateBigInt();
 		
 		return (bigInt && bigInt.negative ? "-" : "") + bigInt2str(bigInt, base);
 	},
 	
-	_getHtml: function(expression) {
-		if (typeOf(expression) != "array" || !expression.bigInt && !expression.operator) {
-			return;
-		}
+	_getHtml: function(stack) {
+		var element = stack.pop();
 		
-		if (expression.bigInt) {
-			var baseString = expression.base;
+		if (!this.operators[element]) {
+			var baseString = element.base;
 			if (baseString == 36) {
 				baseString = "ZA";
 			} else if (baseString == 10) {
 				baseString = "MU";
 			}
-			return bigInt2str(expression, expression.base) + "<sub>" + baseString + "</sub>";
+			return bigInt2str(element, element.base) + "<sub>" + baseString + "</sub>";
 		}
 		
-		var result = "";
-		for (var i = 0; i < expression.length; i++) {
-			result += this._getHtml(expression[i]);
-			if(expression[i+1]) {
-				if (expression.operator == "+") {
-					result += " + ";
-				} else if (expression.operator == "-") {
-					result += " - ";
-				} else {
-					return;
-				}
-			}
-		}
-		
-		return result;
+		var right = this._getHtml(stack);
+		var left = this._getHtml(stack);
+		return [left, element, right].join(" ");
 	},
 	
-	_calculateBigInt: function(expression) {
-		if (typeOf(expression) != "array" || !expression.bigInt && !expression.operator) {
-			return;
-		}
-		
-		if (expression.bigInt) {
-			return expression;
-		}
-		
-		var result;
-		for (var i = 0; i < expression.length; i++) {
-			var bigInt = this._calculateBigInt(expression[i]);
-			if (i > 0) {
-				bigInt = Calculator.calculate(expression.operator, result, bigInt);
+	_calculateBigInt: function() {
+		var stack = [];
+		for (var i = 0; i < this._expression.length; i++) {
+			var element = this._expression[i];
+			if (!this.operators[element]) {
+				stack.push(element);
+			} else {
+				var second = stack.pop();
+				var first = stack.pop();
+				var result = Calculator.calculate(element, first, second);
+				stack.push(result);
 			}
-			if (!bigInt) {
-				return;
-			}
-			result = bigInt;
 		}
 		
-		return result;
+		return stack.pop();
 	},
 	
 	_parse: function(input) {
@@ -99,46 +87,46 @@ var Expression = new Class({
 			return;
 		}
 		
-		if (input.test(/^[0-9A-Za-z]+$/)) { // number
-			// check base
-			var base = 36;
-			if (input.length >= 2 && input.charAt(0) == 0 && this.bases[input.charAt(1)]) {
-				base = this.bases[input.charAt(1)];
-				input = input.slice(2);
+		/* shunting-yard algorithm */
+		var expression = []; // Reverse Polish notation
+		var stack = [];
+		while (input.length > 0) {
+			var stripSize = 0;
+			var number = (/^[0-9A-Z]+/ig).exec(input);
+			if (number && number.length) { // number
+				stripSize = number[0].length;
+				var bigInt = this._parseNumber(number[0]);
+				expression.push(bigInt);
+			} else { // operator
+				var operator = input.charAt(0);
+				stripSize = 1;
+				while (stack.length && this.operators[operator] <= this.operators[stack.peek()]) {
+					expression.push(stack.pop());
+				}
+				stack.push(operator);
 			}
-			
-			// create bigint
-			var bigInt = str2bigInt(input, base);
-			bigInt.bigInt = true;
-			bigInt.base = base;
-			
-			return bigInt;
+			input = input.substring(stripSize, input.length); // remaining expression
+		}
+		while (stack.length) {
+			expression.push(stack.pop());
 		}
 		
-		// else: calculation
-		// 1. +
-		var expression = input.split("+");
-		if (expression.length > 1) {
-			expression.operator = "+";
-			for (var i = 0; i < expression.length; i++) {
-				expression[i] = this._parse(expression[i]);
-			}
-			
-			return expression;
+		return expression;
+	},
+	
+	_parseNumber: function(number) {
+		/* check base */
+		var base = 36;
+		if (number.length >= 2 && number.charAt(0) == 0 && this.bases[number.charAt(1)]) {
+			base = this.bases[number.charAt(1)];
+			number = number.slice(2);
 		}
 		
-		// 2. -
-		expression = input.split("-");
-		if (expression.length > 1) {
-			expression.operator = "-";
-			for (var i = 0; i < expression.length; i++) {
-				expression[i] = this._parse(expression[i]);
-			}
-			
-			return expression;
-		}
+		/* create bigint */
+		var bigInt = str2bigInt(number, base);
+		bigInt.base = base;
 		
-		return; // error
+		return bigInt;
 	}
 });
 
