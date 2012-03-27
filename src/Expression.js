@@ -11,7 +11,8 @@ var Expression = new Class({
 	
 	operators: { // value: precedence from 1 to n, higher numbers = higher precedence
 		"+": 1,
-		"-": 1
+		"-": 1,
+		"*": 2
 	},
 	
 	initialize: function(input) {
@@ -131,5 +132,5 @@ var Expression = new Class({
 });
 
 Expression.extend({
-	pattern: " *([0-9A-Za-z]+ *([+-] *[0-9A-Za-z]+ *)*[+-]? *)?"
+	pattern: " *([0-9A-Za-z]+ *([-+*] *[0-9A-Za-z]+ *)*[-+*]? *)?"
 });

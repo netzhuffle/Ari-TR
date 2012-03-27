@@ -13,6 +13,10 @@ var Calculator = {
 			result = this._substract(firstBigInt, secondBigInt);
 		}
 		
+		if (operation == "*") {
+			result = this._multiply(firstBigInt, secondBigInt);
+		}
+		
 		if(result && isZero(result)) {
 			result.negative = false;
 		}
@@ -60,6 +64,19 @@ var Calculator = {
 			result.negative = true;
 		}
 		
+		return result;
+	},
+	
+	_multiply: function(first, second) {
+		if (greater(second, first)) {
+			return this._multiply(second, first); // faster (see BigInt.js)
+		}
+		
+		var result = mult(first, second);
+		if (first.negative && !second.negative || second.negative && !first.negative) {
+			result.negative = true;
+		}
+
 		return result;
 	}
 };
