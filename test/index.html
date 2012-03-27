@@ -123,6 +123,9 @@ test("isValid()", function() {
 	e = new Expression("1");
 	ok(e.isValid(), "1");
 	
+	e = new Expression("1 2 3");
+	ok(e.isValid(), "spaces in numbers");
+	
 	e = new Expression("2+5-3-az*abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ*1");
 	ok(e.isValid(), "long case changing string");
 	
@@ -160,6 +163,7 @@ test("Expression.pattern", function() {
 	ok(RegExp("^" + Expression.pattern + "$"), "pattern valid RegExp");
 	ok(RegExp("^" + Expression.pattern + "$").test("ABCDE0FGHIJ1KLMNO2PQRS3TU4VW5XY6Z+0zab7cdefg8hijklmnop9qrstuvwxyz*0987654321*1+0+"), "working pattern");
 	ok(RegExp("^" + Expression.pattern + "$").test(""), "working pattern for empty string");
+	ok(RegExp("^" + Expression.pattern + "$").test("1 2 3"), "spaces in numbers");
 	ok(!RegExp("^" + Expression.pattern + "$").test("ab#23"), "invalid chars");
 	ok(!RegExp("^" + Expression.pattern + "$").test("a++2"), "plus plus");
 	ok(!RegExp("^" + Expression.pattern + "$").test("a+-2"), "plus minus");

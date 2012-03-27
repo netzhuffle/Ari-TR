@@ -142,5 +142,5 @@ var Expression = new Class({
 });
 
 Expression.extend({
-	pattern: " *([0-9A-Za-z]+ *([-+*] *[0-9A-Za-z]+ *)*[-+*]? *)?"
+	pattern: " *([0-9A-Za-z][ 0-9A-Za-z]* *([-+*] *[0-9A-Za-z][ 0-9A-Za-z]* *)*[-+*]? *)?"
 });
