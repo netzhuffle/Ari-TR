@@ -201,6 +201,39 @@ test("isValid() & Exppression.pattern", function() {
 	var e = "hello+this-is- ";
 	ok(RegExp("^" + Expression.pattern + "$").test(e), "hello+this-is-[space] (still typing) pattern");
 	ok((new Expression(e)).isValid(), "hello+this-is-[space] (still typing) valid");
+	
+	var e = "(1 * 1) + 2";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "(1 * 1) + 2 pattern");
+	ok((new Expression(e)).isValid(), "(1 * 1) + 2 valid");
+	
+	var e = "1 * (1 + 2)";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1 * (1 + 2) pattern");
+	ok((new Expression(e)).isValid(), "1 * (1 + 2) valid");
+	
+	var e = "1 * (1 + 2) - 3";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1 * (1 + 2) - 3 pattern");
+	ok((new Expression(e)).isValid(), "1 * (1 + 2) - 3 valid");
+	
+	var e = "1 (* 1) + 2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "1 (* 1) + 2 pattern");
+	ok(!(new Expression(e)).isValid(), "1 (* 1) + 2 valid");
+	
+	var e = "1 * (1 +) 2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "1 * (1 +) 2 pattern");
+	ok(!(new Expression(e)).isValid(), "1 * (1 +) 2 valid");
+	
+	var e = "1 * (1)";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1 * (1) pattern");
+	ok((new Expression(e)).isValid(), "1 * (1) valid");
+	
+	var e = " ( 1 * ((2 + (4 )) ) ) ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "nested parentheses and spaces pattern");
+	ok((new Expression(e)).isValid(), "nested parentheses and spaces valid");
+	
+	var e = "1 * (1 + (2 - 1)";
+	ok(!(new Expression(e)).isValid(), "mismatched parenthesis 1");
+	var e = "1) * (1 + 2)";
+	ok(!(new Expression(e)).isValid(), "mismatched parenthesis 2");
 });
 
 test("calculate()", function() {
@@ -230,6 +263,12 @@ test("calculate()", function() {
 	
 	e = new Expression("1 000 + 1 000 000 * 1 - 2");
 	strictEqual(e.calculate(), "1000ZZY", "ignore spaces inside numbers, result with capital letters");
+	
+	e = new Expression("2*(3+4)");
+	strictEqual(e.calculate(), "E", "1*(2+3)");
+	
+	e = new Expression("(2*3)+4");
+	strictEqual(e.calculate(), "A", "(1*2)+3");
 });
 
 test("calculate() bases", function() {
@@ -255,7 +294,7 @@ test("calculate() bases", function() {
 	strictEqual(e.calculate(), "AA", "no base but prefixed with 0");
 });
 
-test("getHtml", function() {
+test("getHtml()", function() {
 	var e = new Expression("4##3");
 	ok(!e.getHtml(), "false value for invalid expression");
 	
@@ -275,6 +314,15 @@ test("getHtml", function() {
 	strictEqual(e.getHtml(), "1<sub>2</sub>", "0b numbers");
 	
 	e = new Expression(" 1+0zab*0xcde -0b 011+ 0m0 02 0*0o7 * 1-0b0 ");
-	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> &middot; CDE<sub>16</sub> &minus; 11<sub>2</sub> + 20<sub>MU</sub> &middot; 7<sub>8</sub> &middot; 1<sub>ZA</sub> &minus; 0<sub>2</sub>", "expression");
+	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> &middot; CDE<sub>16</sub> &minus; 11<sub>2</sub> + 20<sub>MU</sub> &middot; 7<sub>8</sub> &middot; 1<sub>ZA</sub> &minus; 0<sub>2</sub>", "long expression");
+
+	e = new Expression("0z2*(0o3+0m4)");
+	strictEqual(e.getHtml(), "2<sub>ZA</sub> &middot; (3<sub>8</sub> + 4<sub>MU</sub>)", "0z2*(0o3+0m4)");
+	
+	e = new Expression("(0z2*0o3)+0m4");
+	strictEqual(e.getHtml(), "2<sub>ZA</sub> &middot; 3<sub>8</sub> + 4<sub>MU</sub>", "(0z2*0o3)+0m4");
+	
+	e = new Expression("(((2+3)*(5+6))+3*((3+(2*4))+6))");
+	strictEqual(e.getHtml(), "(2<sub>ZA</sub> + 3<sub>ZA</sub>) &middot; (5<sub>ZA</sub> + 6<sub>ZA</sub>) + 3<sub>ZA</sub> &middot; (3<sub>ZA</sub> + 2<sub>ZA</sub> &middot; 4<sub>ZA</sub> + 6<sub>ZA</sub>)", "long expression with nested parentheses");
 });
 </script>

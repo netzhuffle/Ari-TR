@@ -68,10 +68,20 @@ var Expression = new Class({
 			return bigInt2str(element, element.base) + "<sub>" + baseString + "</sub>";
 		}
 		
+		var operator = this.operators[element];
+		
+		var rightOperator = this.operators[stack.peek()];
 		var right = this._getHtml(stack);
+		if (rightOperator && operator.precedence > rightOperator.precedence) {
+			right = "(" + right + ")";
+		}
+		var leftOperator = this.operators[stack.peek()];
 		var left = this._getHtml(stack);
-		var operator = this.operators[element].html;
-		return [left, operator, right].join(" ");
+		if (leftOperator && operator.precedence > leftOperator.precedence) {
+			left = "(" + left + ")";
+		}
+		
+		return [left, operator.html, right].join(" ");
 	},
 	
 	_calculateBigInt: function() {
@@ -108,18 +118,33 @@ var Expression = new Class({
 				stripSize = number[0].length;
 				var bigInt = this._parseNumber(number[0]);
 				expression.push(bigInt);
-			} else { // operator
+			} else {
 				var operator = input.charAt(0);
 				stripSize = 1;
-				while (stack.length && this.operators[operator].precedence <= this.operators[stack.peek()].precedence) {
-					expression.push(stack.pop());
+				if (operator == ")") {
+					while (stack.length && stack.peek() != "(") {
+						expression.push(stack.pop());
+					}
+					if (stack.pop() != "(") {
+						return; // error: missmatching parentheses
+					}
+				} else {
+					if(operator != "(") {
+						while (stack.length && stack.peek() != "(" && this.operators[operator].precedence <= this.operators[stack.peek()].precedence) {
+							expression.push(stack.pop());
+						}
+					}
+					stack.push(operator);
 				}
-				stack.push(operator);
 			}
 			input = input.substring(stripSize, input.length); // remaining expression
 		}
 		while (stack.length) {
-			expression.push(stack.pop());
+			var operator = stack.pop();
+			if (operator == "(") {
+				return; // error: missmatching parentheses
+			}
+			expression.push(operator);
 		}
 		
 		return expression;
@@ -142,5 +167,5 @@ var Expression = new Class({
 });
 
 Expression.extend({
-	pattern: " *([0-9A-Za-z][ 0-9A-Za-z]* *([-+*] *[0-9A-Za-z][ 0-9A-Za-z]* *)*[-+*]? *)?"
+	pattern: "([\\( ]*[0-9A-Za-z][ 0-9A-Za-z]*[\\) ]*([-+*][\\( ]*[0-9A-Za-z][ 0-9A-Za-z]*[\\) ]*)*[-+*]?[ \\(]*)?"
 });
