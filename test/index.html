@@ -244,7 +244,7 @@ test("getHtml", function() {
 	e = new Expression("0b1");
 	strictEqual(e.getHtml(), "1<sub>2</sub>", "0b numbers");
 	
-	e = new Expression(" 1+0zab*0xcde -0b 011+ 0m0 02 0*0o7 * 1 ");
-	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> * CDE<sub>16</sub> - 11<sub>2</sub> + 20<sub>MU</sub> * 7<sub>8</sub> * 1<sub>ZA</sub>", "expression");
+	e = new Expression(" 1+0zab*0xcde -0b 011+ 0m0 02 0*0o7 * 1-0b0 ");
+	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> &middot; CDE<sub>16</sub> &minus; 11<sub>2</sub> + 20<sub>MU</sub> &middot; 7<sub>8</sub> &middot; 1<sub>ZA</sub> &minus; 0<sub>2</sub>", "expression");
 });
 </script>

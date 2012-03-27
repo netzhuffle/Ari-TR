@@ -9,10 +9,19 @@ var Expression = new Class({
 		b: 2
 	},
 	
-	operators: { // value: precedence from 1 to n, higher numbers = higher precedence
-		"+": 1,
-		"-": 1,
-		"*": 2
+	operators: {
+		"+": {
+			precedence: 1,
+			html: "+"
+		},
+		"-": {
+			precedence: 1,
+			html: "&minus;"
+		},
+		"*": {
+			precedence: 2,
+			html: "&middot;"
+		}
 	},
 	
 	initialize: function(input) {
@@ -61,7 +70,8 @@ var Expression = new Class({
 		
 		var right = this._getHtml(stack);
 		var left = this._getHtml(stack);
-		return [left, element, right].join(" ");
+		var operator = this.operators[element].html;
+		return [left, operator, right].join(" ");
 	},
 	
 	_calculateBigInt: function() {
@@ -101,7 +111,7 @@ var Expression = new Class({
 			} else { // operator
 				var operator = input.charAt(0);
 				stripSize = 1;
-				while (stack.length && this.operators[operator] <= this.operators[stack.peek()]) {
+				while (stack.length && this.operators[operator].precedence <= this.operators[stack.peek()].precedence) {
 					expression.push(stack.pop());
 				}
 				stack.push(operator);
