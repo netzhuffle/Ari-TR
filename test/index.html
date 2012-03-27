@@ -114,67 +114,93 @@ test("*", function() {
 
 module("Expression");
 
-test("isValid()", function() {
-	// TODO merge tests from isValid() and Expression.pattern, more edge cases
-	
-	var e = new Expression("");
-	ok(e.isValid(), "empty string");
-	
-	e = new Expression("1");
-	ok(e.isValid(), "1");
-	
-	e = new Expression("1 2 3");
-	ok(e.isValid(), "spaces in numbers");
-	
-	e = new Expression("2+5-3-az*abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ*1");
-	ok(e.isValid(), "long case changing string");
-	
-	e = new Expression("0zA");
-	ok(e.isValid(), "0zA");
-	
-	e = new Expression("0z");
-	ok(e.isValid(), "0z");
-	
-	e = new Expression("0u");
-	ok(e.isValid(), "0u");
-	
-	e = new Expression("1#2");
-	ok(!e.isValid(), "1#2");
-	
-	e = new Expression("1+");
-	ok(e.isValid(), "1+ (still typing)");
-	
-	e = new Expression("1*");
-	ok(e.isValid(), "1* (still typing)");
-	
-	e = new Expression("1++2");
-	ok(!e.isValid(), "1++2");
-	
-	e = new Expression("1-+2");
-	ok(!e.isValid(), "1-+2");
-	
-	e = new Expression("hello+this-is- ");
-	ok(e.isValid(), "hello+this-is-[space] (still typing)");
-});
-
-test("Expression.pattern", function() {
-	ok(Expression.pattern, "pattern defined");
-	
+test("isValid() & Exppression.pattern", function() {
+	ok(Expression.pattern, "Expression.pattern defined");
 	ok(RegExp("^" + Expression.pattern + "$"), "pattern valid RegExp");
-	ok(RegExp("^" + Expression.pattern + "$").test("ABCDE0FGHIJ1KLMNO2PQRS3TU4VW5XY6Z+0zab7cdefg8hijklmnop9qrstuvwxyz*0987654321*1+0+"), "working pattern");
-	ok(RegExp("^" + Expression.pattern + "$").test(""), "working pattern for empty string");
-	ok(RegExp("^" + Expression.pattern + "$").test("1 2 3"), "spaces in numbers");
-	ok(!RegExp("^" + Expression.pattern + "$").test("ab#23"), "invalid chars");
-	ok(!RegExp("^" + Expression.pattern + "$").test("a++2"), "plus plus");
-	ok(!RegExp("^" + Expression.pattern + "$").test("a+-2"), "plus minus");
-	ok(!RegExp("^" + Expression.pattern + "$").test("a-+2"), "minus plus");
-	ok(!RegExp("^" + Expression.pattern + "$").test("a--2"), "minus minus");
-	ok(!RegExp("^" + Expression.pattern + "$").test("-2"), "start with minus");
-	ok(!RegExp("^" + Expression.pattern + "$").test("+2"), "start with plus");
-	ok(!RegExp("^" + Expression.pattern + "$").test(" +2"), "start with space and plus");
-	ok(RegExp("^" + Expression.pattern + "$").test("2+"), "end with plus (still typing)");
-	ok(RegExp("^" + Expression.pattern + "$").test("2+ "), "end with plus and space (still typing)");
-	ok(RegExp("^" + Expression.pattern + "$").test("2 + "), "end with space, plus and space (still typing)");
+	
+	var e = "";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "empty string pattern");
+	ok((new Expression(e)).isValid(), "empty string valid");
+	
+	var e = "1";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1 pattern");
+	ok((new Expression(e)).isValid(), "1 valid");
+	
+	var e = "1 2 3";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "spaces in number pattern");
+	ok((new Expression(e)).isValid(), "spaces in number valid");
+	
+	var e = "2+5-3-az*abcdefghijklmnopqrstuvwxyz-0z1ABCDEFGHIJKLMNOPQRSTUVWXYZ*1+01234567890";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "long case changing string pattern");
+	ok((new Expression(e)).isValid(), "long case changing string valid");
+	
+	var e = "0zA";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "0zA pattern");
+	ok((new Expression(e)).isValid(), "0zA valid");
+	
+	var e = "0z";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "0z pattern");
+	ok((new Expression(e)).isValid(), "0z valid");
+	
+	var e = "0u";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "0u pattern");
+	ok((new Expression(e)).isValid(), "0u valid");
+	
+	var e = "1#2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "1#2 pattern");
+	ok(!(new Expression(e)).isValid(), "1#2 valid");
+	
+	var e = "1++2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "plus plus pattern");
+	ok(!(new Expression(e)).isValid(), "plus plus valid");
+	
+	var e = "1-+2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "minus plus pattern");
+	ok(!(new Expression(e)).isValid(), "minus plus valid");
+	
+	var e = "1+-2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "plus minus pattern");
+	ok(!(new Expression(e)).isValid(), "plus minus valid");
+	
+	var e = "1--2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "minus minus pattern");
+	ok(!(new Expression(e)).isValid(), "minus minus valid");
+	
+	var e = "+2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "start with plus pattern");
+	ok(!(new Expression(e)).isValid(), "start with plus valid");
+	
+	var e = "-2";
+	ok(!RegExp("^" + Expression.pattern + "$").test(e), "start with minus pattern");
+	ok(!(new Expression(e)).isValid(), "start with minus valid");
+	
+	var e = "1+";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1+ (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1+ (still typing) valid");
+	
+	var e = "1*";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1* (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1* (still typing) valid");
+	
+	var e = "1+ ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1+[space] (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1+[space] (still typing) valid");
+	
+	var e = "1* ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1*[space] (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1*[space] (still typing) valid");
+	
+	var e = "1 + ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1[space]+[space] (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1[space]+[space] (still typing) valid");
+	
+	var e = "1 * ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "1[space]*[space] (still typing) pattern");
+	ok((new Expression(e)).isValid(), "1[space]*[space] (still typing) valid");
+	
+	var e = "hello+this-is- ";
+	ok(RegExp("^" + Expression.pattern + "$").test(e), "hello+this-is-[space] (still typing) pattern");
+	ok((new Expression(e)).isValid(), "hello+this-is-[space] (still typing) valid");
 });
 
 test("calculate()", function() {
