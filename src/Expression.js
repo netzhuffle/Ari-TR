@@ -111,9 +111,10 @@ var Expression = new Class({
 		/* shunting-yard algorithm */
 		var expression = []; // Reverse Polish notation
 		var stack = [];
+		var numberExp = /^[0-9A-Z]+/ig;
 		while (input.length > 0) {
 			var stripSize = 0;
-			var number = (/^[0-9A-Z]+/ig).exec(input);
+			var number = numberExp.exec(input);
 			if (number && number.length) { // number
 				stripSize = number[0].length;
 				var bigInt = this._parseNumber(number[0]);
