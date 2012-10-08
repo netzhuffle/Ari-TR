@@ -9,8 +9,11 @@ document.addEvent("domready", function() {
 			input.addClass("invalid");
 		} else {
 			input.removeClass("invalid");
-			styledInput.set("html", expression.getHtml() || "");
-			output.set("html", expression.calculate() || "");
+			var result = expression.calculate();
+			if (result) {
+				styledInput.set("html", expression.getHtml() || "");
+				output.set("html", expression.calculate() || "");
+			}
 		}
 	};
 

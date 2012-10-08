@@ -52,10 +52,18 @@ var Expression = new Class({
 		base = base || 36;
 		var bigInt = this._calculateBigInt();
 		
+		if (!bigInt) {
+			return;
+		}
+		
 		return (bigInt && bigInt.negative ? "-" : "") + bigInt2str(bigInt, base);
 	},
 	
 	_getHtml: function(stack) {
+		if (!stack.length) {
+			return "";
+		}
+		
 		var element = stack.pop();
 		
 		if (!this.operators[element]) {
