@@ -332,6 +332,6 @@ test("getHtml()", function() {
 	strictEqual(e.getHtml(), "(2<sub>ZA</sub> + 3<sub>ZA</sub>) &middot; (5<sub>ZA</sub> + 6<sub>ZA</sub>) + 3<sub>ZA</sub> &middot; (3<sub>ZA</sub> + 2<sub>ZA</sub> &middot; 4<sub>ZA</sub> + 6<sub>ZA</sub>)", "long expression with nested parentheses");
 	
 	e = new Expression("1+");
-	ok(e.getHtml(), "1+ returns truthy value (1+ is undefined behavior, but must't raise an exception!)");
+	ok(e.getHtml(), "1+ returns truthy value (1+ is undefined behavior, but mustn't raise an exception!)");
 });
 </script>
