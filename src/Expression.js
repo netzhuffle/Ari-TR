@@ -50,13 +50,13 @@ var Expression = new Class({
 		}
 		
 		base = base || 36;
-		var bigInt = this._calculateBigInt();
+		var result = this._calculateResult();
 		
-		if (!bigInt) {
+		if (!result) {
 			return;
 		}
 		
-		return (bigInt && bigInt.negative ? "-" : "") + bigInt2str(bigInt, base);
+		return result.toString(base).toUpperCase();
 	},
 	
 	_getHtml: function(stack) {
@@ -73,7 +73,7 @@ var Expression = new Class({
 			} else if (baseString == 10) {
 				baseString = "MU";
 			}
-			return bigInt2str(element, element.base) + "<sub>" + baseString + "</sub>";
+			return element.toString(element.base).toUpperCase() + "<sub>" + baseString + "</sub>";
 		}
 		
 		var operator = this.operators[element];
@@ -92,7 +92,7 @@ var Expression = new Class({
 		return [left, operator.html, right].join(" ");
 	},
 	
-	_calculateBigInt: function() {
+	_calculateResult: function() {
 		var stack = [];
 		for (var i = 0; i < this._expression.length; i++) {
 			var element = this._expression[i];
@@ -125,8 +125,8 @@ var Expression = new Class({
 			var number = numberExp.exec(input);
 			if (number && number.length) { // number
 				stripSize = number[0].length;
-				var bigInt = this._parseNumber(number[0]);
-				expression.push(bigInt);
+				var bigNumber = this._parseNumber(number[0]);
+				expression.push(bigNumber);
 			} else {
 				var operator = input.charAt(0);
 				stripSize = 1;
@@ -160,18 +160,20 @@ var Expression = new Class({
 	},
 	
 	_parseNumber: function(number) {
-		/* check base */
 		var base = 36;
 		if (number.length >= 2 && number.charAt(0) == 0 && this.bases[number.charAt(1)]) {
 			base = this.bases[number.charAt(1)];
 			number = number.slice(2);
 		}
 		
-		/* create bigint */
-		var bigInt = str2bigInt(number, base);
-		bigInt.base = base;
+		if (number.length == 0) {
+			number = "0";
+		}
 		
-		return bigInt;
+		var bigNumber = new BigNumber(number, base);
+		bigNumber.base = base;
+		
+		return bigNumber;
 	}
 });
 
