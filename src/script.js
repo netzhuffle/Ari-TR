@@ -1,7 +1,10 @@
 document.addEvent("domready", function() {
 	var input = $("input");
-	var styledInput = $("styledinput");
 	var output = $("output");
+	var styledMath = null;
+	MathJax.Hub.Queue(function() {
+		styledMath = MathJax.Hub.getAllJax("styledInput")[0];
+	});
 	
 	var action = function() {
 		var expression = new Expression(input.get("value"));
@@ -11,7 +14,7 @@ document.addEvent("domready", function() {
 			input.removeClass("invalid");
 			var result = expression.calculate();
 			if (result) {
-				styledInput.set("html", expression.getHtml() || "");
+				MathJax.Hub.Queue(["Text", styledMath, expression.getTeX() || "\( \)"]);
 				output.set("html", expression.calculate() || "");
 			}
 		}

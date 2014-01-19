@@ -322,4 +322,39 @@ test("getHtml()", function() {
 	e = new Expression("1+");
 	ok(e.getHtml(), "1+ returns truthy value (1+ is undefined behavior, but mustn't raise an exception!)");
 });
+
+test("getTeX()", function() {
+	var e = new Expression("4##3");
+	ok(!e.getTeX(), "falsy value for invalid expression");
+	
+	e = new Expression("0z1");
+	strictEqual(e.getTeX(), "\\mathrm{1}_\\mathrm{ZA}", "0z numbers");
+	
+	e = new Expression("0m1");
+	strictEqual(e.getTeX(), "1_\\mathrm{MU}", "0m numbers");
+	
+	e = new Expression("0x1");
+	strictEqual(e.getTeX(), "\\mathrm{1}_{16}", "0x numbers");
+	
+	e = new Expression("0o1");
+	strictEqual(e.getTeX(), "1_8", "0o numbers");
+	
+	e = new Expression("0b1");
+	strictEqual(e.getTeX(), "1_2", "0b numbers");
+	
+	e = new Expression(" 1+0zab*0xcde -0b 011+ 0m0 02 0*0o7 * 1-0b0 ");
+	strictEqual(e.getTeX(), "\\mathrm{1}_\\mathrm{ZA} + \\mathrm{AB}_\\mathrm{ZA} \\times \\mathrm{CDE}_{16} - 11_2 + 20_\\mathrm{MU} \\times 7_8 \\times \\mathrm{1}_\\mathrm{ZA} - 0_2", "long expression");
+
+	e = new Expression("0z2*(0o3+0m4)");
+	strictEqual(e.getTeX(), "\\mathrm{2}_\\mathrm{ZA} \\times \\left( 3_8 + 4_\\mathrm{MU} \\right)", "0z2*(0o3+0m4)");
+	
+	e = new Expression("(0z2*0o3)+0m4");
+	strictEqual(e.getTeX(), "\\mathrm{2}_\\mathrm{ZA} \\times 3_8 + 4_\\mathrm{MU}", "(0z2*0o3)+0m4");
+	
+	e = new Expression("(((2+3)*(5+6))+3*((3+(2*4))+6))");
+	strictEqual(e.getTeX(), "\\left( \\mathrm{2}_\\mathrm{ZA} + \\mathrm{3}_\\mathrm{ZA} \\right) \\times \\left( \\mathrm{5}_\\mathrm{ZA} + \\mathrm{6}_\\mathrm{ZA} \\right) + \\mathrm{3}_\\mathrm{ZA} \\times \\left( \\mathrm{3}_\\mathrm{ZA} + \\mathrm{2}_\\mathrm{ZA} \\times \\mathrm{4}_\\mathrm{ZA} + \\mathrm{6}_\\mathrm{ZA} \\right)", "long expression with nested parentheses");
+	
+	e = new Expression("1+");
+	ok(e.getTeX(), "1+ returns truthy value (1+ is undefined behavior, but mustn't raise an exception!)");
+});
 </script>

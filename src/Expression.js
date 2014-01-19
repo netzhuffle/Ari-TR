@@ -12,15 +12,18 @@ var Expression = new Class({
 	operators: {
 		"+": {
 			precedence: 1,
-			html: "+"
+			html: "+",
+			tex: "+"
 		},
 		"-": {
 			precedence: 1,
-			html: "&minus;"
+			html: "&minus;",
+			tex: "-"
 		},
 		"*": {
 			precedence: 2,
-			html: "&times;"
+			html: "&times;",
+			tex: "\\times"
 		}
 	},
 	
@@ -42,6 +45,18 @@ var Expression = new Class({
 			stack[i] = this._expression[i];
 		}
 		return this._getHtml(stack);
+	},
+	
+	getTeX: function() {
+		if (!this.isValid()) {
+			return;
+		}
+		
+		var stack = [];
+		for (var i = 0; i < this._expression.length; i++) {
+			stack[i] = this._expression[i];
+		}
+		return this._getTeX(stack);
 	},
 	
 	calculate: function(base) {
@@ -90,6 +105,46 @@ var Expression = new Class({
 		}
 		
 		return [left, operator.html, right].join(" ");
+	},
+	
+	_getTeX: function(stack) {
+		if (!stack.length) {
+			return "";
+		}
+		
+		var element = stack.pop();
+		
+		if (!this.operators[element]) {
+			var baseString = element.base;
+			if (baseString == 36) {
+				baseString = "\\mathrm{ZA}";
+			} else if (baseString == 10) {
+				baseString = "\\mathrm{MU}";
+			} else if (baseString > 9) {
+				baseString = "{" + baseString + "}";
+			}
+			
+			var number = element.toString(element.base).toUpperCase();
+			if (element.base > 10) {
+				number = "\\mathrm{" + number + "}";
+			}
+			return  number + "_" + baseString;
+		}
+		
+		var operator = this.operators[element];
+		
+		var rightOperator = this.operators[stack.peek()];
+		var right = this._getTeX(stack);
+		if (rightOperator && operator.precedence > rightOperator.precedence) {
+			right = "\\left( " + right + " \\right)";
+		}
+		var leftOperator = this.operators[stack.peek()];
+		var left = this._getTeX(stack);
+		if (leftOperator && operator.precedence > leftOperator.precedence) {
+			left = "\\left( " + left + " \\right)";
+		}
+		
+		return [left, operator.tex, right].join(" ");
 	},
 	
 	_calculateResult: function() {
