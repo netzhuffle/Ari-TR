@@ -20,7 +20,7 @@ var Expression = new Class({
 		},
 		"*": {
 			precedence: 2,
-			html: "&middot;"
+			html: "&times;"
 		}
 	},
 	

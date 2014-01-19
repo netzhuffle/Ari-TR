@@ -290,7 +290,7 @@ test("calculate() bases", function() {
 
 test("getHtml()", function() {
 	var e = new Expression("4##3");
-	ok(!e.getHtml(), "false value for invalid expression");
+	ok(!e.getHtml(), "falsy value for invalid expression");
 	
 	e = new Expression("0z1");
 	strictEqual(e.getHtml(), "1<sub>ZA</sub>", "0z numbers");
@@ -308,16 +308,16 @@ test("getHtml()", function() {
 	strictEqual(e.getHtml(), "1<sub>2</sub>", "0b numbers");
 	
 	e = new Expression(" 1+0zab*0xcde -0b 011+ 0m0 02 0*0o7 * 1-0b0 ");
-	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> &middot; CDE<sub>16</sub> &minus; 11<sub>2</sub> + 20<sub>MU</sub> &middot; 7<sub>8</sub> &middot; 1<sub>ZA</sub> &minus; 0<sub>2</sub>", "long expression");
+	strictEqual(e.getHtml(), "1<sub>ZA</sub> + AB<sub>ZA</sub> &times; CDE<sub>16</sub> &minus; 11<sub>2</sub> + 20<sub>MU</sub> &times; 7<sub>8</sub> &times; 1<sub>ZA</sub> &minus; 0<sub>2</sub>", "long expression");
 
 	e = new Expression("0z2*(0o3+0m4)");
-	strictEqual(e.getHtml(), "2<sub>ZA</sub> &middot; (3<sub>8</sub> + 4<sub>MU</sub>)", "0z2*(0o3+0m4)");
+	strictEqual(e.getHtml(), "2<sub>ZA</sub> &times; (3<sub>8</sub> + 4<sub>MU</sub>)", "0z2*(0o3+0m4)");
 	
 	e = new Expression("(0z2*0o3)+0m4");
-	strictEqual(e.getHtml(), "2<sub>ZA</sub> &middot; 3<sub>8</sub> + 4<sub>MU</sub>", "(0z2*0o3)+0m4");
+	strictEqual(e.getHtml(), "2<sub>ZA</sub> &times; 3<sub>8</sub> + 4<sub>MU</sub>", "(0z2*0o3)+0m4");
 	
 	e = new Expression("(((2+3)*(5+6))+3*((3+(2*4))+6))");
-	strictEqual(e.getHtml(), "(2<sub>ZA</sub> + 3<sub>ZA</sub>) &middot; (5<sub>ZA</sub> + 6<sub>ZA</sub>) + 3<sub>ZA</sub> &middot; (3<sub>ZA</sub> + 2<sub>ZA</sub> &middot; 4<sub>ZA</sub> + 6<sub>ZA</sub>)", "long expression with nested parentheses");
+	strictEqual(e.getHtml(), "(2<sub>ZA</sub> + 3<sub>ZA</sub>) &times; (5<sub>ZA</sub> + 6<sub>ZA</sub>) + 3<sub>ZA</sub> &times; (3<sub>ZA</sub> + 2<sub>ZA</sub> &times; 4<sub>ZA</sub> + 6<sub>ZA</sub>)", "long expression with nested parentheses");
 	
 	e = new Expression("1+");
 	ok(e.getHtml(), "1+ returns truthy value (1+ is undefined behavior, but mustn't raise an exception!)");
